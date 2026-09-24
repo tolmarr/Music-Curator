@@ -40,24 +40,24 @@ Users cannot:
 ## Schema Outline
 
 USER
- ├── rates ───────────────> ALBUM
- │
- ├── favourites ──────────> ALBUM
- │
- ├── favourites ──────────> SONG
- │
- └── creates ─────────────> CURATED LIST
-                                  │
-                                  │ contains
-                                  ▼
-                                SONG
-
-ARTIST
-   │
-   ├── associated with ──> ALBUM
-   │
-   └── associated with ──> SONG
-
-ALBUM
-   │
-   └── contains ─────────> SONG
+├── rates ───────────────> ALBUM\
+│\
+├── favourites ──────────> ALBUM\
+│\
+├── favourites ──────────> SONG\
+│\
+└── creates ─────────────> CURATED LIST\
+                                  │\
+                                  │ contains\
+                                  ▼\
+                                SONG\
+\
+ARTIST\
+   │\
+   ├── associated with ──> ALBUM\
+   │\
+   └── associated with ──> SONG\
+\
+ALBUM\
+   │\
+   └── contains ─────────> SONG\
