@@ -39,7 +39,7 @@ Users cannot:
 
 ## Schema Outline
 
-USER
+USER\
 ├── rates ───────────────> ALBUM\
 │\
 ├── favourites ──────────> ALBUM\
