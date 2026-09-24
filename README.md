@@ -50,7 +50,7 @@ USER
                                   │\
                                   │ contains\
                                   ▼\
-                                SONG\
+                                  SONG\
 \
 ARTIST\
    │\
