@@ -58,6 +58,6 @@ ARTIST\
    │\
    └── associated with ──> SONG\
 \
-ALBUM\
+ALBUM
    │\
-   └── contains ─────────> SONG\
+   └── contains ─────────> SONG
