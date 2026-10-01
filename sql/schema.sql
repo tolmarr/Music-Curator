@@ -31,8 +31,9 @@ CREATE TABLE Users (
 -- ============================================================
 
 CREATE TABLE Artists (
-    artist_id INT PRIMARY KEY
-);
+	artist_id INT PRIMARY KEY AUTO_INCREMENT,
+    artist_name VARCHAR(255) NOT NULL
+    );
 
 
 -- ============================================================
@@ -56,7 +57,9 @@ CREATE TABLE Albums (
 -- ============================================================
 
 CREATE TABLE Songs (
-    song_id INT PRIMARY KEY
+	song_id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    duration_seconds INT NOT NULL CHECK (duration_seconds > 0)
 );
 
 
@@ -193,7 +196,14 @@ CREATE TABLE ListAlbums (
 -- credit_type required
 -- ============================================================
 
--- TODO
+CREATE TABLE Performs (
+	artist_id INT, song_id INT,
+    credit_type VARCHAR (50) NOT NULL, PRIMARY KEY (artist_id, song_id),
+	FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
+	FOREIGN KEY (song_id) REFERENCES Songs(song_id)
+);
+
+
 
 
 -- ============================================================
