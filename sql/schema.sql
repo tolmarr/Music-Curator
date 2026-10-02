@@ -11,17 +11,16 @@ USE music_curator;
 -- Chris      : Artists + Songs
 -- ============================================================
 
-
 -- ============================================================
 -- USERS
 -- Cooper
 -- add attributes
 -- related to Lists
 -- ============================================================
-
 -- todo: force immutability
 -- username varchar(50)       [pk, not null, note: 'Unique and immutable username/handle']
 -- display_name varchar(100)  [not null]
+
 CREATE TABLE Users (
     username VARCHAR(50) NOT NULL PRIMARY KEY, 
     display_name varchar(100) NOT NULL
@@ -48,11 +47,11 @@ CREATE TABLE Artists (
 -- primary_genre required
 -- related to ListAlbums
 -- ============================================================
-
 -- album_id int               [pk, increment]
 -- title varchar(255)         [not null]
 -- release_date date          [not null]
 -- primary_genre varchar(100) [not null]
+
 CREATE TABLE Albums (
     album_id INT AUTO_INCREMENT PRIMARY KEY ,
     title VARCHAR(255) NOT NULL,
@@ -78,13 +77,21 @@ CREATE TABLE Songs (
 -- ============================================================
 -- LISTS
 -- Aga + Tola
+-- list_type is 'SONG' or 'ALBUM'
+-- a SONG list may only contain songs (ListSongs) and an ALBUM
+-- list may only contain albums (ListAlbums); not enforced by
+-- the schema
 -- ============================================================
 
 CREATE TABLE Lists (
-    list_id INT PRIMARY KEY,
+    list_id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
-    list_name VARCHAR(100) NOT NULL,
-    description VARCHAR(500),
+    title VARCHAR(100) NOT NULL,
+    list_type VARCHAR(10) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CHECK (list_type IN ('SONG', 'ALBUM')),
 
     FOREIGN KEY (username)
         REFERENCES Users(username)
@@ -92,37 +99,9 @@ CREATE TABLE Lists (
 
 
 -- ============================================================
--- SONG LISTS
--- Aga + Tola
--- subtype of Lists
--- ============================================================
-
-CREATE TABLE SongLists (
-    list_id INT PRIMARY KEY,
-
-    FOREIGN KEY (list_id)
-        REFERENCES Lists(list_id)
-);
-
-
--- ============================================================
--- ALBUM LISTS
--- Aga + Tola
--- subtype of Lists
--- ============================================================
-
-CREATE TABLE AlbumLists (
-    list_id INT PRIMARY KEY,
-
-    FOREIGN KEY (list_id)
-        REFERENCES Lists(list_id)
-);
-
-
--- ============================================================
 -- LIST SONGS
 -- Aga + Tola
--- connects SongLists and Songs
+-- connects Lists and Songs (SONG lists only)
 -- position is positive and unique within a list
 -- ============================================================
 
@@ -138,7 +117,7 @@ CREATE TABLE ListSongs (
     CHECK (position > 0),
 
     FOREIGN KEY (list_id)
-        REFERENCES SongLists(list_id),
+        REFERENCES Lists(list_id),
 
     FOREIGN KEY (song_id)
         REFERENCES Songs(song_id)
@@ -148,7 +127,7 @@ CREATE TABLE ListSongs (
 -- ============================================================
 -- LIST ALBUMS
 -- Aga + Tola
--- connects AlbumLists and Albums
+-- connects Lists and Albums (ALBUM lists only)
 -- position is positive and unique within a list
 -- ============================================================
 
@@ -164,7 +143,7 @@ CREATE TABLE ListAlbums (
     CHECK (position > 0),
 
     FOREIGN KEY (list_id)
-        REFERENCES AlbumLists(list_id),
+        REFERENCES Lists(list_id),
 
     FOREIGN KEY (album_id)
         REFERENCES Albums(album_id)
@@ -177,11 +156,10 @@ CREATE TABLE ListAlbums (
 -- Users rate Albums
 -- rating is 1-5 whole stars
 -- ============================================================
-
-
 -- Users rate albums only,
 -- Ratings are whole-number values from 1 through 5,
 -- A user may have at most one current rating per album
+
 CREATE TABLE rates (
     username VARCHAR(50) NOT NULL,
     album_id INT NOT NULL,
@@ -202,11 +180,10 @@ CREATE TABLE rates (
 -- Cooper
 -- connects Users and Albums
 -- ============================================================
-
-
 -- Note: Users may favourite albums,
 -- Songs cannot currently be favourited,
 -- A user may favourite a particular album at most once
+
 CREATE TABLE Favourites (
     username VARCHAR(50) NOT NULL,
     album_id INT NOT NULL,
@@ -228,8 +205,25 @@ CREATE TABLE Favourites (
 -- track_number required
 -- positive and unique within an Album
 -- ============================================================
+-- A song may appear on multiple albums, but at most once per album
 
--- TODO
+CREATE TABLE AlbumSongs (
+    album_id INT NOT NULL,
+    song_id INT NOT NULL,
+    track_number INT NOT NULL,
+
+    PRIMARY KEY (album_id, song_id),
+
+    UNIQUE (album_id, track_number),
+
+    CHECK (track_number > 0),
+
+    FOREIGN KEY (album_id)
+        REFERENCES Albums(album_id),
+
+    FOREIGN KEY (song_id)
+        REFERENCES Songs(song_id)
+);
 
 
 -- ============================================================
@@ -247,8 +241,6 @@ CREATE TABLE Performs (
 );
 
 
-
-
 -- ============================================================
 -- ARTIST ALBUMS
 -- Chris + Cooper
@@ -256,7 +248,19 @@ CREATE TABLE Performs (
 -- credit_type required
 -- ============================================================
 
--- TODO
+CREATE TABLE ArtistAlbums (
+    artist_id INT NOT NULL,
+    album_id INT NOT NULL,
+    credit_type VARCHAR(50) NOT NULL,
+
+    PRIMARY KEY (artist_id, album_id),
+
+    FOREIGN KEY (artist_id)
+        REFERENCES Artists(artist_id),
+
+    FOREIGN KEY (album_id)
+        REFERENCES Albums(album_id)
+);
 
 
 -- ============================================================
@@ -265,27 +269,30 @@ CREATE TABLE Performs (
 
 -- Users
 --   username
+--   display_name
 --
 -- Artists
 --   artist_id
+--   artist_name
 --
 -- Albums
 --   album_id
+--   title
+--   release_date
+--   primary_genre
 --
 -- Songs
 --   song_id
+--   title
+--   duration_seconds
 --
 -- Lists
 --   list_id
 --   username
---   list_name
---   description
---
--- SongLists
---   list_id
---
--- AlbumLists
---   list_id
+--   title
+--   list_type
+--   created_at
+--   updated_at
 --
 -- ListSongs
 --   list_id
@@ -296,6 +303,30 @@ CREATE TABLE Performs (
 --   list_id
 --   album_id
 --   position
+--
+-- rates
+--   username
+--   album_id
+--   rating
+--
+-- Favourites
+--   username
+--   album_id
+--
+-- AlbumSongs
+--   album_id
+--   song_id
+--   track_number
+--
+-- Performs
+--   artist_id
+--   song_id
+--   credit_type
+--
+-- ArtistAlbums
+--   artist_id
+--   album_id
+--   credit_type
 
 
 -- ============================================================
@@ -304,27 +335,23 @@ CREATE TABLE Performs (
 
 -- Users -> Lists
 --
--- Lists -> SongLists
---
--- Lists -> AlbumLists
---
--- SongLists <-> Songs
+-- Lists <-> Songs
 --   ListSongs
 --
--- AlbumLists <-> Albums
+-- Lists <-> Albums
 --   ListAlbums
 --
 -- Users <-> Albums
---   AlbumRatings
+--   rates
 --
 -- Users <-> Albums
---   FavouriteAlbums
+--   Favourites
 --
 -- Albums <-> Songs
 --   AlbumSongs
 --
 -- Artists <-> Songs
---   ArtistSongs
+--   Performs
 --
 -- Artists <-> Albums
 --   ArtistAlbums
