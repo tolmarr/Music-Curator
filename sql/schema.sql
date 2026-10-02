@@ -19,8 +19,13 @@ USE music_curator;
 -- related to Lists
 -- ============================================================
 
+-- todo: force immutability
+-- username varchar(50)       [pk, not null, note: 'Unique and immutable username/handle']
+-- display_name varchar(100)  [not null]
 CREATE TABLE Users (
-    username VARCHAR(50) PRIMARY KEY
+    username VARCHAR(50) NOT NULL PRIMARY KEY, 
+    display_name varchar(100) NOT NULL
+
 );
 
 
@@ -44,8 +49,15 @@ CREATE TABLE Artists (
 -- related to ListAlbums
 -- ============================================================
 
+-- album_id int               [pk, increment]
+-- title varchar(255)         [not null]
+-- release_date date          [not null]
+-- primary_genre varchar(100) [not null]
 CREATE TABLE Albums (
-    album_id INT PRIMARY KEY
+    album_id INT AUTO_INCREMENT PRIMARY KEY ,
+    title VARCHAR(255) NOT NULL,
+    release_date DATE NOT NULL,
+    primary_genre VARCHAR(100) NOT NULL
 );
 
 
@@ -166,7 +178,23 @@ CREATE TABLE ListAlbums (
 -- rating is 1-5 whole stars
 -- ============================================================
 
--- TODO
+
+-- Users rate albums only,
+-- Ratings are whole-number values from 1 through 5,
+-- A user may have at most one current rating per album
+CREATE TABLE rates (
+    username VARCHAR(50) NOT NULL,
+    album_id INT NOT NULL,
+    rating INT NOT NULL CHECK (rating >= 1 AND rating <=5),
+
+    PRIMARY KEY (username, album_id),
+
+    FOREIGN KEY (username) 
+        REFERENCES Users(username),
+
+    FOREIGN KEY (album_id) 
+        REFERENCES Albums(album_id)
+);
 
 
 -- ============================================================
@@ -175,7 +203,22 @@ CREATE TABLE ListAlbums (
 -- connects Users and Albums
 -- ============================================================
 
--- TODO
+
+-- Note: Users may favourite albums,
+-- Songs cannot currently be favourited,
+-- A user may favourite a particular album at most once
+CREATE TABLE Favourites (
+    username VARCHAR(50) NOT NULL,
+    album_id INT NOT NULL,
+
+    PRIMARY KEY (username, album_id),
+
+    FOREIGN KEY (username) 
+        REFERENCES Users(username),
+
+    FOREIGN KEY (album_id) 
+        REFERENCES Albums(album_id)
+);
 
 
 -- ============================================================
