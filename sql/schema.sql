@@ -160,7 +160,7 @@ CREATE TABLE ListAlbums (
 -- Ratings are whole-number values from 1 through 5,
 -- A user may have at most one current rating per album
 
-CREATE TABLE rates (
+CREATE TABLE Rates (
     username VARCHAR(50) NOT NULL,
     album_id INT NOT NULL,
     rating INT NOT NULL CHECK (rating >= 1 AND rating <=5),
