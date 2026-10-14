@@ -20,11 +20,14 @@ USE music_curator;
 -- todo: force immutability
 -- username varchar(50)       [pk, not null, note: 'Unique and immutable username/handle']
 -- display_name varchar(100)  [not null]
+-- certification is assigned from an authorized process and cannot be freely chosen by users
+-- the boolean field does not enforce this permission check
 
 CREATE TABLE Users (
     username VARCHAR(50) NOT NULL PRIMARY KEY, 
-    display_name varchar(100) NOT NULL
-
+    display_name varchar(100) NOT NULL,
+    is_certified_curator boolean NOT NULL DEFAULT FALSE,
+    password_hash VARCHAR(255)
 );
 
 
