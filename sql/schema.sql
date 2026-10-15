@@ -81,9 +81,9 @@ CREATE TABLE Songs (
 -- LISTS
 -- Aga + Tola
 -- list_type is 'SONG' or 'ALBUM'
--- a SONG list may only contain songs (ListSongs) and an ALBUM
--- list may only contain albums (ListAlbums); not enforced by
--- the schema
+-- supertype of SongLists and AlbumLists
+-- every list must also be inserted into the subtype matching
+-- its list_type; not enforced by the schema
 -- ============================================================
 
 CREATE TABLE Lists (
@@ -96,15 +96,61 @@ CREATE TABLE Lists (
 
     CHECK (list_type IN ('SONG', 'ALBUM')),
 
+    UNIQUE (list_id, list_type),
+
     FOREIGN KEY (username)
         REFERENCES Users(username)
 );
 
 
 -- ============================================================
+-- SONG LISTS
+-- Aga + Tola
+-- subtype of Lists
+-- list_type is fixed to 'SONG' so a SONG list can't also be
+-- an AlbumList, and Lists.list_type can't disagree
+-- ============================================================
+
+CREATE TABLE SongLists (
+    list_id INT PRIMARY KEY,
+    list_type VARCHAR(10) NOT NULL DEFAULT 'SONG',
+
+    CHECK (list_type = 'SONG'),
+
+    FOREIGN KEY (list_id)
+        REFERENCES Lists(list_id),
+
+    FOREIGN KEY (list_id, list_type)
+        REFERENCES Lists(list_id, list_type)
+);
+
+
+-- ============================================================
+-- ALBUM LISTS
+-- Aga + Tola
+-- subtype of Lists
+-- list_type is fixed to 'ALBUM' so an ALBUM list can't also be
+-- a SongList, and Lists.list_type can't disagree
+-- ============================================================
+
+CREATE TABLE AlbumLists (
+    list_id INT PRIMARY KEY,
+    list_type VARCHAR(10) NOT NULL DEFAULT 'ALBUM',
+
+    CHECK (list_type = 'ALBUM'),
+
+    FOREIGN KEY (list_id)
+        REFERENCES Lists(list_id),
+
+    FOREIGN KEY (list_id, list_type)
+        REFERENCES Lists(list_id, list_type)
+);
+
+
+-- ============================================================
 -- LIST SONGS
 -- Aga + Tola
--- connects Lists and Songs (SONG lists only)
+-- connects SongLists and Songs
 -- position is positive and unique within a list
 -- ============================================================
 
@@ -120,7 +166,7 @@ CREATE TABLE ListSongs (
     CHECK (position > 0),
 
     FOREIGN KEY (list_id)
-        REFERENCES Lists(list_id),
+        REFERENCES SongLists(list_id),
 
     FOREIGN KEY (song_id)
         REFERENCES Songs(song_id)
@@ -130,7 +176,7 @@ CREATE TABLE ListSongs (
 -- ============================================================
 -- LIST ALBUMS
 -- Aga + Tola
--- connects Lists and Albums (ALBUM lists only)
+-- connects AlbumLists and Albums
 -- position is positive and unique within a list
 -- ============================================================
 
@@ -146,7 +192,7 @@ CREATE TABLE ListAlbums (
     CHECK (position > 0),
 
     FOREIGN KEY (list_id)
-        REFERENCES Lists(list_id),
+        REFERENCES AlbumLists(list_id),
 
     FOREIGN KEY (album_id)
         REFERENCES Albums(album_id)
@@ -162,11 +208,17 @@ CREATE TABLE ListAlbums (
 -- Users rate albums only,
 -- Ratings are whole-number values from 1 through 5,
 -- A user may have at most one current rating per album
+-- each rating can have a review
+-- review is optional (NULL = no written review); blank or
+-- whitespace-only reviews are rejected, store NULL instead
 
 CREATE TABLE Rates (
     username VARCHAR(50) NOT NULL,
     album_id INT NOT NULL,
     rating INT NOT NULL CHECK (rating >= 1 AND rating <=5),
+    review TEXT,
+
+    CHECK (review IS NULL OR review REGEXP '[^[:space:]]'),
 
     PRIMARY KEY (username, album_id),
 
@@ -297,6 +349,14 @@ CREATE TABLE ArtistAlbums (
 --   created_at
 --   updated_at
 --
+-- SongLists
+--   list_id
+--   list_type
+--
+-- AlbumLists
+--   list_id
+--   list_type
+--
 -- ListSongs
 --   list_id
 --   song_id
@@ -307,10 +367,11 @@ CREATE TABLE ArtistAlbums (
 --   album_id
 --   position
 --
--- rates
+-- Rates
 --   username
 --   album_id
 --   rating
+--   review
 --
 -- Favourites
 --   username
@@ -338,14 +399,18 @@ CREATE TABLE ArtistAlbums (
 
 -- Users -> Lists
 --
--- Lists <-> Songs
+-- Lists -> SongLists
+--
+-- Lists -> AlbumLists
+--
+-- SongLists <-> Songs
 --   ListSongs
 --
--- Lists <-> Albums
+-- AlbumLists <-> Albums
 --   ListAlbums
 --
 -- Users <-> Albums
---   rates
+--   Rates
 --
 -- Users <-> Albums
 --   Favourites

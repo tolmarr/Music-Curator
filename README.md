@@ -38,7 +38,7 @@ Users cannot:
 - Track numbers are positive and unique within an album. Multi-disc albums just continue the numbering.
 - Songs and albums can each have multiple credited artists, each with a credit type (e.g. primary, feature, collaboration).
 - Lists are either song lists or album lists (`list_type` is 'SONG' or 'ALBUM').
-- Song lists only contain songs and album lists only contain albums. This is not enforced by the schema, so inserts must check `list_type`.
+- Song lists only contain songs and album lists only contain albums.
 - Items in a list are ordered by a position that is positive and unique within the list.
 - The same song can appear in multiple song lists, and the same album in multiple album lists.
 
@@ -49,7 +49,7 @@ The schema is in `sql/schema.sql`.
 | ERD relationship | Table |
 |---|---|
 | CREATES | `Lists.username` (foreign key) |
-| RATES | `rates` |
+| RATES | `Rates` |
 | FAVOURITES | `Favourites` |
 | CONTAINS_SONG | `ListSongs` |
 | CONTAINS_ALBUM | `ListAlbums` |
