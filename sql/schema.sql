@@ -112,6 +112,11 @@ CREATE TABLE Lists (
 -- list_type is fixed to 'SONG' so a SONG list can't also be
 -- an AlbumList, and Lists.list_type can't disagree
 -- ============================================================
+-- CONSTRAINTS (T04)
+-- Let S be the set of list_id values in SongLists
+-- Let L be the set of list_id values in Lists
+-- Every ID in SongLists must also be in Lists
+-- project (list_id) from (SongLists) (subset of) project (list_id) from (Lists)
 
 CREATE TABLE SongLists (
     list_id INT PRIMARY KEY,
@@ -134,6 +139,11 @@ CREATE TABLE SongLists (
 -- list_type is fixed to 'ALBUM' so an ALBUM list can't also be
 -- a SongList, and Lists.list_type can't disagree
 -- ============================================================
+-- CONSTRAINTS (T04)
+-- Let S be the set of list_id values in AlbumLists
+-- Let L be the set of list_id values in Lists
+-- Every ID in AlbumLists must also be in Lists
+-- project (list_id) from (AlbumLists) (subset of) project (list_id) from (Lists)
 
 CREATE TABLE AlbumLists (
     list_id INT PRIMARY KEY,
@@ -213,6 +223,15 @@ CREATE TABLE ListAlbums (
 -- each rating can have a review
 -- review is optional (NULL = no written review); blank or
 -- whitespace-only reviews are rejected, store NULL instead
+-- ============================================================
+-- CONSTRAINTS (T04)
+-- valid row:   (review IS NULL)     (OR)  (review contains a non-whitespace character)
+-- invalid row: (review is NOT NULL) (AND) (review is empty or only whitespace) 
+-- there should be no such invalid rows, ie the set containing all rows meeting the invalid condition must be empty
+--
+-- Let W+ be the set of whitespace strings of length >= 1
+-- Let B (blank strings) = { s is a string s.t |s|=0 OR s is a member of W+ }
+-- select (review is a member of B) from (Rates) = empty set
 
 CREATE TABLE Rates (
     username VARCHAR(50) NOT NULL,
