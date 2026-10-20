@@ -238,7 +238,7 @@ CREATE TABLE Rates (
     album_id INT NOT NULL,
     rating INT NOT NULL CHECK (rating >= 1 AND rating <=5),
     review TEXT,
-
+    rated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CHECK (review IS NULL OR review REGEXP '[^[:space:]]'),
 
     PRIMARY KEY (username, album_id),
@@ -393,6 +393,7 @@ CREATE TABLE ArtistAlbums (
 --   album_id
 --   rating
 --   review
+--   rated_at
 --
 -- Favourites
 --   username

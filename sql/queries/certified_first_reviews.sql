@@ -16,4 +16,5 @@ JOIN Albums AS a -- a, the Albums table
 WHERE r.review IS NOT NULL
 ORDER BY
     u.is_certified_curator DESC,
+    r.rated_at DESC,
     u.username ASC; -- if multiple reviewers have the same certification status, sort them alphabetically by username
