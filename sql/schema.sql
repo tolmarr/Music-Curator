@@ -13,15 +13,13 @@ USE music_curator;
 
 -- ============================================================
 -- USERS
--- Cooper
--- add attributes
--- related to Lists
+-- Cooper + Chris
+-- username is meant to be immutable; not enforced by the schema
+-- password_hash stores a password hash, never a plaintext password
+-- certification is assigned from an authorized process and cannot
+-- be freely chosen by users; the boolean field does not enforce
+-- this permission check
 -- ============================================================
--- todo: force immutability
--- username varchar(50)       [pk, not null, note: 'Unique and immutable username/handle']
--- display_name varchar(100)  [not null]
--- certification is assigned from an authorized process and cannot be freely chosen by users
--- the boolean field does not enforce this permission check
 
 CREATE TABLE Users (
     username VARCHAR(50) NOT NULL PRIMARY KEY, 
@@ -34,7 +32,6 @@ CREATE TABLE Users (
 -- ============================================================
 -- ARTISTS
 -- Chris
--- add attributes
 -- ============================================================
 
 CREATE TABLE Artists (
@@ -46,14 +43,9 @@ CREATE TABLE Artists (
 -- ============================================================
 -- ALBUMS
 -- Cooper
--- add attributes
--- primary_genre required
--- related to ListAlbums
+-- primary_genre is the album's one main genre (required);
+-- additional genres go in AlbumGenreTags
 -- ============================================================
--- album_id int               [pk, increment]
--- title varchar(255)         [not null]
--- release_date date          [not null]
--- primary_genre varchar(100) [not null]
 
 CREATE TABLE Albums (
     album_id INT AUTO_INCREMENT PRIMARY KEY ,
@@ -66,8 +58,6 @@ CREATE TABLE Albums (
 -- ============================================================
 -- SONGS
 -- Chris
--- add attributes
--- related to ListSongs
 -- ============================================================
 
 CREATE TABLE Songs (
@@ -214,15 +204,11 @@ CREATE TABLE ListAlbums (
 -- ============================================================
 -- ALBUM RATINGS
 -- Cooper
--- Users rate Albums
--- rating is 1-5 whole stars
--- ============================================================
--- Users rate albums only,
--- Ratings are whole-number values from 1 through 5,
--- A user may have at most one current rating per album
--- each rating can have a review
+-- users rate albums only (songs cannot be rated)
+-- rating is 1-5 whole stars, at most one rating per user per album
 -- review is optional (NULL = no written review); blank or
 -- whitespace-only reviews are rejected, store NULL instead
+-- rated_at records when the rating was made; used to order reviews
 -- ============================================================
 -- CONSTRAINTS (T04)
 -- valid row:   (review IS NULL)     (OR)  (review contains a non-whitespace character)
@@ -255,10 +241,9 @@ CREATE TABLE Rates (
 -- FAVOURITE ALBUMS
 -- Cooper
 -- connects Users and Albums
+-- users favourite albums only (songs cannot be favourited)
+-- a user may favourite a particular album at most once
 -- ============================================================
--- Note: Users may favourite albums,
--- Songs cannot currently be favourited,
--- A user may favourite a particular album at most once
 
 CREATE TABLE Favourites (
     username VARCHAR(50) NOT NULL,
@@ -278,10 +263,9 @@ CREATE TABLE Favourites (
 -- ALBUM SONGS
 -- Cooper + Chris
 -- connects Albums and Songs
--- track_number required
--- positive and unique within an Album
+-- a song may appear on multiple albums, but at most once per album
+-- track_number is required, positive, and unique within an album
 -- ============================================================
--- A song may appear on multiple albums, but at most once per album
 
 CREATE TABLE AlbumSongs (
     album_id INT NOT NULL,
@@ -340,12 +324,35 @@ CREATE TABLE ArtistAlbums (
 
 
 -- ============================================================
+-- ALBUM GENRE TAGS
+-- Aga
+-- an album can have many genre tags, each at most once
+-- tags are separate from primary_genre, which may or may not
+-- also be a tag
+-- album_id ->> genre_tag independently of an album's credited
+-- artists, so tags are kept out of ArtistAlbums (4NF)
+-- ============================================================
+
+CREATE TABLE AlbumGenreTags (
+    album_id INT NOT NULL,
+    genre_tag VARCHAR(100) NOT NULL,
+
+    PRIMARY KEY (album_id, genre_tag),
+
+    FOREIGN KEY (album_id)
+        REFERENCES Albums(album_id)
+);
+
+
+-- ============================================================
 -- CURRENT TABLES / ATTRIBUTES
 -- ============================================================
 
 -- Users
 --   username
 --   display_name
+--   is_certified_curator
+--   password_hash
 --
 -- Artists
 --   artist_id
@@ -413,6 +420,10 @@ CREATE TABLE ArtistAlbums (
 --   artist_id
 --   album_id
 --   credit_type
+--
+-- AlbumGenreTags
+--   album_id
+--   genre_tag
 
 
 -- ============================================================
@@ -445,3 +456,6 @@ CREATE TABLE ArtistAlbums (
 --
 -- Artists <-> Albums
 --   ArtistAlbums
+--
+-- Albums -> genre tags (multivalued)
+--   AlbumGenreTags
