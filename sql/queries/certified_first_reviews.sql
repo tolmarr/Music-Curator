@@ -1,6 +1,6 @@
 -- Display album reviews with certified curators first.
--- Reviewers with the same certification status are sorted
--- alphabetically by username.
+-- Reviews with the same certification status are sorted
+-- newest first by rated_at, then alphabetically by username.
 SELECT
     a.title AS album_title,
     u.username,
@@ -17,4 +17,4 @@ WHERE r.review IS NOT NULL
 ORDER BY
     u.is_certified_curator DESC,
     r.rated_at DESC,
-    u.username ASC; -- if multiple reviewers have the same certification status, sort them alphabetically by username
+    u.username ASC; -- if reviews share certification status and rated_at, sort alphabetically by username

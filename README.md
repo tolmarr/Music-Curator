@@ -32,6 +32,9 @@ Users cannot:
 
 - Ratings apply only to albums.
 - Ratings are on a scale of 1-5 stars, one rating per user per album.
+- Users can mark another user's written review as helpful or not helpful, once per review, and never their own.
+- Helpful counts are calculated from the votes and never stored.
+- Votes on ratings without review text are accepted but ignored by the review queries.
 - Songs cannot be rated or favourited.
 - Albums can be explicitly favourited, once per user.
 - A song may appear on multiple albums, but only once per album.

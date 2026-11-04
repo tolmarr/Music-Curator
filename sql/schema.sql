@@ -238,6 +238,33 @@ CREATE TABLE Rates (
 
 
 -- ============================================================
+-- REVIEW VOTES
+-- Aga
+-- users mark another user's review as helpful or not helpful
+-- one vote per user per review; users cannot vote on their own
+-- votes point at a Rates row through (reviewer_username, album_id)
+-- a vote on a rating with no review text is accepted by the
+-- schema; queries ignore it with review IS NOT NULL
+-- helpful counts are derived from votes and never stored
+-- ============================================================
+
+CREATE TABLE ReviewVotes (
+    voter_username    VARCHAR(50) NOT NULL,
+    reviewer_username VARCHAR(50) NOT NULL,
+    album_id          INT NOT NULL,
+    is_helpful        BOOLEAN NOT NULL CHECK (is_helpful IN (0, 1)),
+
+    PRIMARY KEY (voter_username, reviewer_username, album_id),
+    CHECK (voter_username <> reviewer_username),
+
+    FOREIGN KEY (voter_username)
+        REFERENCES Users(username),
+    FOREIGN KEY (reviewer_username, album_id)
+        REFERENCES Rates(username, album_id)
+);
+
+
+-- ============================================================
 -- FAVOURITE ALBUMS
 -- Cooper
 -- connects Users and Albums
@@ -402,6 +429,12 @@ CREATE TABLE AlbumGenreTags (
 --   review
 --   rated_at
 --
+-- ReviewVotes
+--   voter_username
+--   reviewer_username
+--   album_id
+--   is_helpful
+--
 -- Favourites
 --   username
 --   album_id
@@ -444,6 +477,9 @@ CREATE TABLE AlbumGenreTags (
 --
 -- Users <-> Albums
 --   Rates
+--
+-- Users <-> Rates (votes on reviews)
+--   ReviewVotes
 --
 -- Users <-> Albums
 --   Favourites
