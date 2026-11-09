@@ -1904,3 +1904,16 @@ FROM Albums AS a
 LEFT JOIN AlbumSongs AS s ON a.album_id = s.album_id
 GROUP BY a.album_id, a.title, a.primary_genre, a.release_date
 ORDER BY a.album_id;
+
+
+SELECT
+    a.title AS album,
+    als.track_number,
+    s.song_id,
+    s.title AS song,
+    s.duration_seconds
+FROM Albums AS a
+JOIN AlbumSongs AS als ON a.album_id = als.album_id
+JOIN Songs AS s ON als.song_id = s.song_id
+WHERE a.album_id = 1
+ORDER BY als.track_number;
