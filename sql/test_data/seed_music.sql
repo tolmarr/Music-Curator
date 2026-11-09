@@ -1906,6 +1906,7 @@ GROUP BY a.album_id, a.title, a.primary_genre, a.release_date
 ORDER BY a.album_id;
 
 
+-- show album 1
 SELECT
     a.title AS album,
     als.track_number,
